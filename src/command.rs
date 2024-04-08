@@ -1,3 +1,4 @@
+use anyhow::Error;
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use uuid::{NoContext, Uuid};
@@ -59,7 +60,12 @@ pub async fn get(
             .select(Command::as_select())
             .load(conn)
             .await?;
-        Ok(cmds.remove(0))
+
+        if cmds.is_empty() {
+            Err(Error::msg("no commands found"))
+        } else {
+            Ok(cmds.remove(0))
+        }
     }
 }
 

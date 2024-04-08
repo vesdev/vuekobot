@@ -101,10 +101,12 @@ async fn main() -> anyhow::Result<()> {
 
                     continue;
                 }
-                println!("a");
 
                 // otherwise we can assume its a user defined command
-                let command = command::get(&mut conn, msg.channel(), cmd).await?;
+                let Ok(command) = command::get(&mut conn, msg.channel(), cmd).await else {
+                    continue;
+                };
+
                 client.privmsg(msg.channel(), &command.value).send().await?;
             }
             tmi::Message::Reconnect => {
