@@ -1,4 +1,4 @@
-{ config, lib, pkgs }: {
+{ config, lib, pkgs, ... }: {
   options = with lib; {
     services.vuekobot = {
       enable = mkEnableOption ''
@@ -11,13 +11,13 @@
       };
 
       configFile = mkOption {
-        type = lib.types.package;
+        type = lib.types.path;
         default = pkgs.vuekobot;
       };
     };
   };
 
-  config = lib.mkif config.services.vuekobot.enable {
+  config = lib.mkIf config.services.vuekobot.enable {
     systemd.services.vuekobot = {
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "postgresql.service" ];
@@ -27,9 +27,9 @@
         user = "vuekobot";
         group = "vuekobot";
         restart = "always";
-        WorkingDirectory = "${config.packages.vuekobot}";
+        WorkingDirectory = "${config.services.vuekobot.package}";
         ExecStart =
-          "${config.packages.vuekobot}/bin/vuekobotj ${config.services.vuekobot.configFile}";
+          "${config.services.vuekobot.package}/bin/vuekobot ${config.services.vuekobot.configFile}";
       };
     };
   };
