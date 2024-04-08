@@ -8,11 +8,17 @@ edition = "2021"
 [dependencies]
 diesel = { version = "2.1.5", features = ["uuid", "postgres"] }
 anyhow = "1.0.81"
-diesel-async = { version = "0.4.1", features = ["postgres", "bb8", "tokio"] }
+diesel-async = { version = "0.4.1", features = [
+  "postgres",
+  "bb8",
+  "tokio",
+  "async-connection-wrapper",
+] }
 tmi = "0.6.0"
 tokio = { version = "1.37.0", features = ["full"] }
 toml = "0.8.12"
 serde = { version = "1.0.197", features = ["derive"] }
+diesel_migrations = "2.1.0"
 # twitch_api = { version = "0.7.0-rc.7", features = [
 #   "reqwest",
 #   "helix",

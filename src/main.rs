@@ -1,14 +1,19 @@
 use std::env;
 
+use diesel::Connection;
 use diesel_async::{
+    async_connection_wrapper::AsyncConnectionWrapper,
     pooled_connection::{bb8::Pool, AsyncDieselConnectionManager},
     AsyncPgConnection,
 };
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use serde::Deserialize;
 use tmi::Badge;
 
 mod command;
 mod schema;
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 #[derive(Deserialize)]
 struct Config {
@@ -23,8 +28,17 @@ async fn main() -> anyhow::Result<()> {
 
     let config: Config = toml::from_str(&std::fs::read_to_string(args[1].clone())?)?;
 
+    let dburl = config.database.clone();
+    tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
+        let mut conn = AsyncConnectionWrapper::<AsyncPgConnection>::establish(&dburl)?;
+        // little bit of tomfoolery
+        let _ = conn.run_pending_migrations(MIGRATIONS);
+        Ok(())
+    });
+
     let mgr = AsyncDieselConnectionManager::<AsyncPgConnection>::new(&config.database);
     let pool = Pool::builder().build(mgr).await?;
+
     let mut client = tmi::Client::builder()
         .credentials(tmi::Credentials {
             login: "vuekobot".into(),
