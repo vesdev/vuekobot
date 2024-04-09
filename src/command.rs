@@ -69,7 +69,7 @@ pub async fn get(
     }
 }
 
-#[derive(Insertable, Queryable, Selectable)]
+#[derive(Debug, Insertable, Queryable, Selectable)]
 #[diesel(table_name = crate::schema::ttv_commands)]
 pub struct Command {
     id: Uuid,
