@@ -16,10 +16,17 @@
 
       perSystem = { config, pkgs, system, ... }:
         let
-          devInputs = with pkgs; [ diesel-cli python3Packages.pgcli ];
+          devInputs = with pkgs; [
+            diesel-cli
+            python3Packages.pgcli
+            corepack
+            nodejs
+            nodePackages.svelte-language-server
+            nodePackages.typescript-language-server
+          ];
           crate = config.nci.outputs.vuekobot;
         in {
-          nci.projects.vuekobot.path = ./.;
+          nci.projects.vuekobot.path = ./vueko-backend;
 
           nci.crates.vuekobot = {
             export = true;
@@ -43,9 +50,9 @@
           devShells.default = crate.devShell.overrideAttrs
             (old: { packages = (old.packages or [ ]) ++ devInputs; });
 
-          packages = rec {
-            vuekobot = crate.packages.release;
-            default = vuekobot;
+          packages = {
+            vueko-backend = crate.packages.release;
+            vueko-frontend = pkgs.callPackage ./site.nix { };
           };
         };
 

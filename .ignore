@@ -1,4 +1,4 @@
-.direnv/
-.devenv/
+/.direnv/
+/.devenv/
 /vuekobot.toml
 

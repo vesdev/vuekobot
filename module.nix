@@ -1,13 +1,13 @@
 { config, lib, pkgs, ... }: {
   options = with lib; {
-    services.vuekobot = {
+    services.vueko-backend = {
       enable = mkEnableOption ''
-        Some twitch chat bot
+        Backend for vueko chat bot
       '';
 
       package = mkOption {
         type = lib.types.package;
-        default = pkgs.vuekobot;
+        default = pkgs.vueko-frontend;
       };
 
       configFile = mkOption {
@@ -15,22 +15,51 @@
         default = pkgs.vuekobot;
       };
     };
-  };
 
-  config = lib.mkIf config.services.vuekobot.enable {
-    systemd.services.vuekobot = {
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "postgresql.service" ];
-      wants = [ "network-online.target" ];
+    services.vueko-frontend = {
+      enable = mkEnableOption ''
+        Frontend for vueko chat bot
+      '';
 
-      serviceConfig = {
-        user = "vuekobot";
-        group = "vuekobot";
-        restart = "always";
-        WorkingDirectory = "${config.services.vuekobot.package}";
-        ExecStart =
-          "${config.services.vuekobot.package}/bin/vuekobot ${config.services.vuekobot.configFile}";
+      package = mkOption {
+        type = lib.types.package;
+        default = pkgs.vueko-backend;
       };
     };
   };
+
+  config = lib.mkIf config.services.vueko-backend.enable {
+    systemd.services.vueko-backend =
+      lib.mkIf config.services.vueko-backend.enable {
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" "postgresql.service" ];
+        wants = [ "network-online.target" ];
+
+        serviceConfig = {
+          user = "vuekobot";
+          group = "vuekobot";
+          restart = "always";
+          WorkingDirectory = "${config.services.vueko-backend.package}";
+          ExecStart =
+            "${config.services.vueko-backend.package}/bin/vuekobot ${config.services.vueko-backend.configFile}";
+        };
+      };
+
+    systemd.services.vueko-frontend =
+      lib.mkIf config.services.vueko-frontend.enable {
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        wants = [ "network-online.target" ];
+
+        serviceConfig = {
+          user = "vuekobot";
+          group = "vuekobot";
+          restart = "always";
+          WorkingDirectory =
+            "${config.services.vueko-frontend.package}/lib/node_modules/vueko-frontend";
+          ExecStart = "${pkgs.nodePackages.npm}/bin/npm run preview";
+        };
+      };
+  };
+
 }

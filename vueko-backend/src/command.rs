@@ -1,4 +1,3 @@
-use anyhow::Error;
 use diesel::prelude::*;
 use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use uuid::{NoContext, Uuid};
@@ -8,7 +7,7 @@ pub async fn add(
     channel: String,
     command: String,
     value: String,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     // remove command if it already exists
     // TODO: replace with UPDATE
     remove(conn, &channel, &command).await?;
@@ -30,7 +29,7 @@ pub async fn remove(
     conn: &mut AsyncPgConnection,
     channel: &str,
     command: &str,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let (chnl, cmd) = (channel, command);
     {
         use crate::schema::ttv_commands::dsl::*;
@@ -49,7 +48,7 @@ pub async fn get(
     conn: &mut AsyncPgConnection,
     channel: &str,
     command: &str,
-) -> anyhow::Result<Command> {
+) -> eyre::Result<Command> {
     let (chnl, cmd) = (channel, command);
     {
         use crate::schema::ttv_commands::dsl::*;
@@ -62,7 +61,7 @@ pub async fn get(
             .await?;
 
         if cmds.is_empty() {
-            Err(Error::msg("no commands found"))
+            Err(eyre::Error::msg("No commands found"))
         } else {
             Ok(cmds.remove(0))
         }
@@ -72,7 +71,7 @@ pub async fn get(
 #[derive(Debug, Insertable, Queryable, Selectable)]
 #[diesel(table_name = crate::schema::ttv_commands)]
 pub struct Command {
-    id: Uuid,
+    pub id: Uuid,
     pub channel: String,
     pub command: String,
     pub value: String,
