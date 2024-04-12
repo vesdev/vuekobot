@@ -28,7 +28,7 @@
     };
   };
 
-  config = lib.mkIf config.services.vueko-backend.enable {
+  config = {
     systemd.services.vueko-backend =
       lib.mkIf config.services.vueko-backend.enable {
         wantedBy = [ "multi-user.target" ];
@@ -55,9 +55,9 @@
           user = "vuekobot";
           group = "vuekobot";
           restart = "always";
-          WorkingDirectory =
-            "${config.services.vueko-frontend.package}/lib/node_modules/vueko-frontend";
-          ExecStart = "${pkgs.nodePackages.npm}/bin/npm run preview";
+          WorkingDirectory = "${config.services.vueko-frontend.package}";
+          ExecStart =
+            "${pkgs.bash}/bin/bash ${config.services.vueko-frontend.package}/bin/vueko-frontend";
         };
       };
   };

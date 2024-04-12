@@ -32,7 +32,7 @@ impl VuekoApi {
         let state = ApiState { pgpool };
         let app = Router::new()
             .route(
-                "/api/v1/channel/:channel/commands",
+                "/api/v1/channel/:channel/commands.json",
                 axum::routing::get(list_commands),
             )
             .with_state(state);

@@ -12,6 +12,6 @@ interface Command {
 }
 
 export const load: PageLoad = async ({ params }): Promise<Commands> => {
-  let response = await fetch("http://localhost:45861/api/v1/channel/" + params.channel + "/commands");
+  let response = await fetch("https://vueko.ves.dev/api/v1/channel/" + params.channel + "/commands.json");
   return await response.json();
 }
